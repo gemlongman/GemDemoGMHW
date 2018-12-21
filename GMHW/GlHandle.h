@@ -4,4 +4,8 @@
 #include "ObjectHandle.h"
 #include "Subdivision.h"
 
-void run(int argc, char* argv[]);
+class GLHandle {
+public:
+	void Run(int argc, char* argv[]);
+
+};

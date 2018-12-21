@@ -1,24 +1,21 @@
 #include "GlHandle.h"
 
-#define MAXsubTimes 3
-
 using namespace std;
 
 vector<Face> faces;
-vector<Point> pts;
+vector<SubdModelPoint> points;
 
 Subdivision subdivision = Subdivision();
-int subTimes = 0;
 
 //input handle
 bool mouseLeftDown = false;
 bool mouseRightDown = false;
-float mouseX, mouseY;
-float cameraDistanceX;
-float cameraDistanceY;
-float cameraAngleX;
-float cameraAngleY;
-float scalefTimes = 1;
+double mouseX, mouseY;
+double cameraDistanceX;
+double cameraDistanceY;
+double cameraAngleX;
+double cameraAngleY;
+double scalefTimes = 1;
 
 
 void Flat(void)
@@ -32,17 +29,16 @@ void Flat(void)
 			GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 			glMaterialfv(GL_FRONT, GL_AMBIENT, showcolor_amb);
 			glMaterialfv(GL_FRONT, GL_DIFFUSE, showcolor);
-			//glMaterialfv(GL_FRONT, GL_DIFFUSE, greenish);
 			glMaterialfv(GL_FRONT, GL_SPECULAR, white);
 			GLfloat shininess[] = { 10 };
 			glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 
 			glBegin(GL_QUADS);
 			glNormal3d(faces[i].Normal.X, -faces[i].Normal.Y, faces[i].Normal.Z);
-			glVertex3f(pts[faces[i].Point1.Index].X, -pts[faces[i].Point1.Index].Y, pts[faces[i].Point1.Index].Z);
-			glVertex3f(pts[faces[i].Point2.Index].X, -pts[faces[i].Point2.Index].Y, pts[faces[i].Point2.Index].Z);
-			glVertex3f(pts[faces[i].Point3.Index].X, -pts[faces[i].Point3.Index].Y, pts[faces[i].Point3.Index].Z);
-			glVertex3f(pts[faces[i].Point4.Index].X, -pts[faces[i].Point4.Index].Y, pts[faces[i].Point4.Index].Z);
+			glVertex3f(points[ faces[i].Point[0].Index ].X, -points[ faces[i].Point[0].Index ].Y, points[ faces[i].Point[0].Index ].Z);
+			glVertex3f(points[ faces[i].Point[1].Index ].X, -points[ faces[i].Point[1].Index ].Y, points[ faces[i].Point[1].Index ].Z);
+			glVertex3f(points[ faces[i].Point[2].Index ].X, -points[ faces[i].Point[2].Index ].Y, points[ faces[i].Point[2].Index ].Z);
+			glVertex3f(points[ faces[i].Point[3].Index ].X, -points[ faces[i].Point[3].Index ].Y, points[ faces[i].Point[3].Index ].Z);
 			glEnd();
 
 		}
@@ -172,35 +168,16 @@ void keyboardHandle(unsigned char key, int x, int y)
 	{
 	case ' ': //subdivide
 	case 's':
-		if (subTimes < MAXsubTimes)
-		{
-			cout << "subdividing please wait ..." << endl;
-			subTimes++;
-			//subDivide();
-			subdivision.subDivide();
-			faces = subdivision.GetFaces();
-			pts = subdivision.GetPts();
-			cout << "finished" << endl;
-		}
-		else 
-		{
-			cout << "subdivid over" << MAXsubTimes - 1 << "times, it cost a lot of time!" << endl;
-		}
+	case 'S':
+		clock_t t = clock();
 
-		break;
-	case 'a': //average
-		cout << "averaging please wait ..." << endl;
-		subdivision.average();
+		subdivision.SetVar(faces, points);
+		subdivision.CCsubDivide();
 		faces = subdivision.GetFaces();
-		pts = subdivision.GetPts();
-		cout << "finished" << endl;
+		points = subdivision.GetPts();
+
+		cout << "finished! costing:" << clock() - t<< "ms" << endl;
 		break;
-	//case 'i':
-	//	for (int i = 0; i < faces.size(); i++)
-	//	{
-	//		faces[i].normal.invert();
-	//	}
-	//	break;
 	}
 }
 
@@ -224,9 +201,11 @@ void specialKeysHandle(int key, int X, int Y)
 }
 
 
-void run(int argc, char* argv[])
+void GLHandle::Run(int argc, char* argv[])
 {
-	string filename = "aircraft-quad.obj";
+	string filename = "cube-quad.obj"; 
+	// cube-
+	// bunny-
 	if (2 == argc && NULL != argv[1] ) {
 		filename = string(argv[1]);
 		cout << filename << endl;
@@ -239,8 +218,8 @@ void run(int argc, char* argv[])
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("GemDemo4GMSub");
 
-	loadObject(filename, pts, faces);
-	subdivision.SetVar(faces, pts);
+	LoadObject(filename, points, faces);
+	subdivision.SetVar(faces, points);
 	init();
 
 	glutMouseFunc(mouseClickHandle);

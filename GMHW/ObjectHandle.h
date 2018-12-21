@@ -3,4 +3,4 @@
 
 #include "PublicStruct.h"
 
-void loadObject(string filename, vector<Point> & pts, vector<Face> & faces);
+void LoadObject(string filename, vector<SubdModelPoint> & points, vector<Face> & faces);
